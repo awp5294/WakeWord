@@ -245,8 +245,18 @@ function Sentence({ p, w }: { p: Palette; w: Word }) {
         <Text style={{ color: p.accent, fontWeight: "700", textDecorationLine: "underline" }}>{"  ?  "}</Text>
         {b}
       </Text>
-      <Text style={{ color: p.muted, fontSize: 14 }}>{w.t}</Text>
+      <Hint key={w.t} p={p} text={w.t} />
     </View>
+  );
+}
+
+// The English stays hidden until you ask for it.
+function Hint({ p, text }: { p: Palette; text: string }) {
+  const [open, setOpen] = useState(false);
+  return open ? (
+    <Text style={{ color: p.muted, fontSize: 15 }}>{text}</Text>
+  ) : (
+    <Btn p={p} kind="link" label="Hint" onPress={() => setOpen(true)} accessibilityLabel="Show the English" style={{ alignSelf: "flex-start" }} />
   );
 }
 
@@ -402,7 +412,7 @@ function SayTask({ p, lang, w, answered, respond }: TaskProps) {
     <View style={{ gap: 12 }}>
       <Kind p={p}>Say it out loud</Kind>
       <WordRow p={p} w={w} tts={d.tts} />
-      <Text style={{ color: p.muted, fontSize: 16 }}>{w.e}</Text>
+      <Hint key={w.e} p={p} text={w.e} />
       {mode === "mic" ? (
         <>
           <Pressable
@@ -447,7 +457,6 @@ function PhotoTask({ p, lang, w, answered, respond, swapType }: TaskProps) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
-  const [english, setEnglish] = useState(false);
 
   const take = async () => {
     if (!cam.current || !ready || busy) return;
@@ -486,7 +495,7 @@ function PhotoTask({ p, lang, w, answered, respond, swapType }: TaskProps) {
       <Kind p={p}>Photo hunt</Kind>
       <Text style={{ color: p.muted, fontSize: 16 }}>Find this and take a photo of it</Text>
       <WordRow p={p} w={w} tts={d.tts} />
-      {english ? <Text style={{ color: p.muted }}>{w.e}</Text> : <Btn p={p} kind="link" label="Show the English" onPress={() => setEnglish(true)} />}
+      <Hint key={w.e} p={p} text={w.e} />
 
       {shot ? (
         <Image source={{ uri: shot }} style={st.photo} accessibilityLabel="Your photo" />
