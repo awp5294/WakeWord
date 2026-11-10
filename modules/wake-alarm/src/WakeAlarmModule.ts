@@ -16,6 +16,7 @@ declare class WakeAlarmNative extends NativeModule<{}> {
   scheduleTest(seconds: number, title: string): Promise<void>;
   cancelAll(): Promise<void>;
   getOwedRing(): number;
+  setSound?(path: string): void;
   missionStarted(): void;
   missionHeartbeat(): void;
   missionComplete(): void;

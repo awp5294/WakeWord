@@ -53,3 +53,10 @@ export function missionComplete(): void {
 export function openSettings(): void {
   if (isAvailable()) Native!.openSettings();
 }
+
+/** Android: the sound the alarm rings with (a file path in the app), or "" for the phone's alarm sound. */
+export function setSound(path: string): void {
+  try {
+    if (isAvailable() && Native!.setSound) Native!.setSound(path);
+  } catch {}
+}

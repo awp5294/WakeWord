@@ -10,7 +10,9 @@ export type TaskType = "pick" | "listen" | "fillpick" | "filltype" | "type" | "s
 export type Level = "beginner" | "intermediate";
 export type WordState = { box: number; due: string; right: number; wrong: number; introduced: string; seen?: boolean; last?: string };
 export type LangProgress = { words: Record<string, WordState>; introDay: string | null; introCount: number };
-export type Settings = { lang: Lang; level: Level; alarm: string; count: number; photos: boolean; newPerDay: number; enabled: boolean; voices: Partial<Record<Lang, string>> };
+export type Settings = { lang: Lang; level: Level; alarm: string; count: number; photos: boolean; newPerDay: number; enabled: boolean; voices: Partial<Record<Lang, string>>;
+  // Alarm sound: "phone" (the phone's alarm sound), a song id, or "custom" (your own file).
+  sound: string; soundUri?: string; soundName?: string };
 export type MissionSummary = { lang: Lang; tasks: number; right: number; wrong: number; secs: number; alarm: boolean };
 export type State = {
   v: number;
@@ -83,7 +85,7 @@ export function freshState(): State {
   return {
     v: 1,
     updatedAt: 0,
-    settings: { lang: "it", level: "beginner", alarm: "06:30", count: 3, photos: true, newPerDay: 2, enabled: false, voices: {} },
+    settings: { lang: "it", level: "beginner", alarm: "06:30", count: 3, photos: true, newPerDay: 2, enabled: false, voices: {}, sound: "phone" },
     progress: {},
     streak: { count: 0, last: null, best: 0 },
     missions: [],

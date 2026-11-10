@@ -43,9 +43,31 @@ export async function voicesFor(tts: string): Promise<Speech.Voice[]> {
   }
 }
 
-/** Short names for the Settings chips: "Voice 1", "Voice 2"... in best-first order. */
-export async function voiceOptions(tts: string, max = 6): Promise<VoiceOption[]> {
-  const list = (await voicesFor(tts)).slice(0, max);
+// Android lists the same voice more than once: a "-local" and a "-network" copy, plus a
+// "-language" alias for the default. Those sound the same, so keep one of each.
+function voiceKey(v: Speech.Voice): string {
+  return v.identifier.toLowerCase().replace(/-(local|network)$/, "");
+}
+
+/** The few clearly different voices worth offering, best first. */
+export async function distinctVoices(tts: string, max = 2): Promise<Speech.Voice[]> {
+  const list = await voicesFor(tts);
+  const real = list.filter((v) => !/-language$/i.test(v.identifier));
+  const seen = new Set<string>();
+  const out: Speech.Voice[] = [];
+  for (const v of real.length ? real : list) {
+    const k = voiceKey(v);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(v);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+/** Short names for the Settings chips: "Voice 1", "Voice 2", in best-first order. */
+export async function voiceOptions(tts: string, max = 2): Promise<VoiceOption[]> {
+  const list = await distinctVoices(tts, max);
   return list.map((v, i) => {
     const enhanced = v.quality === Speech.VoiceQuality.Enhanced || /premium|enhanced/i.test(v.identifier);
     // iOS names voices (Alice, Federica); Android gives codes like it-it-x-itd-local.
@@ -55,7 +77,7 @@ export async function voiceOptions(tts: string, max = 6): Promise<VoiceOption[]>
 }
 
 async function pick(tts: string): Promise<string | undefined> {
-  const list = await voicesFor(tts);
+  const list = await distinctVoices(tts);
   const want = chosen[tts];
   if (want && list.some((v) => v.identifier === want)) return want;
   return list[0]?.identifier;

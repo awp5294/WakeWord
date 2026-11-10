@@ -57,6 +57,9 @@ class WakeAlarmModule : Module() {
       AlarmService.send(context, AlarmService.ACTION_COMPLETE)
     }
 
+    // Alarm sound: a file path inside the app, or "" for the phone's alarm sound.
+    Function("setSound") { path: String -> AlarmStore.setSoundPath(context, path) }
+
     Function("getOwedRing") { (AlarmStore.owed(context) ?: 0L).toDouble() }
 
     Function("missionStarted") { AlarmService.send(context, AlarmService.ACTION_SILENCE) }

@@ -144,13 +144,28 @@ class AlarmService : Service() {
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
         )
-        setDataSource(this@AlarmService, uri)
+        val custom = AlarmStore.soundPath(this@AlarmService).removePrefix("file://")
+        if (custom.isNotEmpty() && java.io.File(custom).canRead()) setDataSource(custom)
+        else setDataSource(this@AlarmService, uri)
         isLooping = true
         prepare()
         start()
       }
     } catch (e: Exception) {
+      player?.release()
       player = null
+      // The chosen file couldn't play: fall back to the phone's alarm sound.
+      try {
+        player = MediaPlayer().apply {
+          setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+          setDataSource(this@AlarmService, uri)
+          isLooping = true
+          prepare()
+          start()
+        }
+      } catch (e2: Exception) {
+        player = null
+      }
     }
     vibrator()?.let { v ->
       val pattern = longArrayOf(0, 800, 600)

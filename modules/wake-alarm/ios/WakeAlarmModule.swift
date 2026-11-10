@@ -68,6 +68,9 @@ public class WakeAlarmModule: Module {
     }
 
     // Epoch ms of the ring that still needs a finished mission, or 0.
+    // Custom alarm sounds are Android-only for now; iPhone uses the AlarmKit sound.
+    Function("setSound") { (_: String) in }
+
     Function("getOwedRing") { () -> Double in
       self.backend?.owedRing() ?? 0
     }

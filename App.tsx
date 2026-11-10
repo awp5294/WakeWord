@@ -8,6 +8,7 @@ import { DECKS, LANGS } from "./src/decks";
 import Home from "./src/Home";
 import { buildMission, currentStreak, dayKey, daysBetween, finishMission, formatTime, langProgress, Mission, State } from "./src/logic";
 import MissionScreen, { Finished } from "./src/Mission";
+import { apply as applySound } from "./src/alarmSound";
 import { startAlarm, stopAlarm } from "./src/sound";
 import { setVoicePrefs } from "./src/speech";
 import { loadState, saveState } from "./src/storage";
@@ -71,6 +72,7 @@ function Main() {
   useEffect(() => {
     loadState().then((s) => {
       syncVoices(s);
+      applySound(s.settings);
       setState(s);
       checkOwed();
     });

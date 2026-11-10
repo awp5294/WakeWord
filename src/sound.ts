@@ -1,14 +1,29 @@
 // The app's own alarm sound, used while the app is open: on the ring screen, and
 // quietly during a mission (full volume again if you stop answering).
-import { AudioPlayer, createAudioPlayer, setAudioModeAsync } from "expo-audio";
+// It plays the song or file picked in Settings, or the built-in tone.
+import { AudioPlayer, AudioSource, createAudioPlayer, setAudioModeAsync } from "expo-audio";
 
 let player: AudioPlayer | null = null;
+let source: string | null = null; // file uri of the picked sound, or null for the built-in tone
+
+export function setAlarmSource(uri: string | null): void {
+  source = uri || null;
+}
+
+function alarmSource(): AudioSource {
+  return source ? { uri: source } : require("../assets/alarm.wav");
+}
 
 export async function startAlarm(volume = 1): Promise<void> {
+  stopPreview();
   try {
     await setAudioModeAsync({ playsInSilentMode: true, interruptionMode: "doNotMix", shouldPlayInBackground: true });
     if (!player) {
-      player = createAudioPlayer(require("../assets/alarm.wav"));
+      try {
+        player = createAudioPlayer(alarmSource());
+      } catch {
+        player = createAudioPlayer(require("../assets/alarm.wav"));
+      }
       player.loop = true;
     }
     level = volume;
@@ -40,4 +55,28 @@ export function stopAlarm(): void {
     player.remove();
   } catch {}
   player = null;
+}
+
+// A short listen in Settings.
+let preview: AudioPlayer | null = null;
+
+export async function playPreview(src: AudioSource | null): Promise<void> {
+  stopPreview();
+  try {
+    await setAudioModeAsync({ playsInSilentMode: true, interruptionMode: "doNotMix", shouldPlayInBackground: false });
+    preview = createAudioPlayer(src ?? require("../assets/alarm.wav"));
+    preview.volume = 0.8;
+    preview.play();
+  } catch {
+    preview = null;
+  }
+}
+
+export function stopPreview(): void {
+  if (!preview) return;
+  try {
+    preview.pause();
+    preview.remove();
+  } catch {}
+  preview = null;
 }

@@ -18,6 +18,10 @@ object AlarmStore {
   private fun prefs(ctx: Context) = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
   fun hour(ctx: Context) = prefs(ctx).getInt("hour", -1)
+
+  // Path of the alarm song or the user's own audio file; empty means the phone's alarm sound.
+  fun soundPath(ctx: Context): String = prefs(ctx).getString("soundPath", "") ?: ""
+  fun setSoundPath(ctx: Context, path: String) = prefs(ctx).edit().putString("soundPath", path).apply()
   fun minute(ctx: Context) = prefs(ctx).getInt("minute", 0)
   fun title(ctx: Context) = prefs(ctx).getString("title", "Wake Word") ?: "Wake Word"
   fun lastComplete(ctx: Context) = prefs(ctx).getLong("lastComplete", 0L)

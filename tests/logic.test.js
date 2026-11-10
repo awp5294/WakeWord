@@ -2,7 +2,9 @@ const path = require("path"); const built = path.resolve(process.argv[2] || path
 const assert = require('assert');
 // deck sanity
 for (const [k, d] of Object.entries(L.DECKS)) {
-  assert.strictEqual(d.words.length, 32, k);
+  assert(d.words.length >= 32, k);
+  if (k !== "de") assert.strictEqual(d.words.length, 250, k);
+  const bs = new Set(d.words.map(w => L.norm(w.b))); assert.strictEqual(bs.size, d.words.length, k + " duplicate words");
   d.words.forEach((w, i) => { assert(w.s.includes('___'), k+i); assert(w.s.split('___').length===2, k+i); assert(L.checkTyped(w.b, w)==='exact', k+' '+w.w); assert(L.checkTyped(w.w, w)==='exact', k+' w '+w.w); });
 }
 const it = L.DECKS.it.words, es = L.DECKS.es.words, fr = L.DECKS.fr.words, de=L.DECKS.de.words;
