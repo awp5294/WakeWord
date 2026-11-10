@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["WakeAlarmModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.wakealarm.WakeAlarmModule"]
+  }
+}

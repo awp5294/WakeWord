@@ -3,20 +3,35 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "9.2.1",
     "expo": "~58.0.23",
+    "expo-audio": "~58.0.11",
+    "expo-camera": "~58.0.14",
+    "expo-constants": "~58.0.15",
+    "expo-image-manipulator": "~58.0.16",
+    "expo-keep-awake": "~58.0.3",
+    "expo-speech": "~58.0.3",
+    "expo-speech-recognition": "^58.0.1",
     "expo-status-bar": "~58.0.4",
     "react": "19.3.0",
-    "react-native": "0.88.1"
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.11.1"
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
     "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "expo lint",
+    "test": "tsc --ignoreConfig src/logic.ts src/decks.ts --outDir .test-build --module commonjs --target es2020 --skipLibCheck --strict && node tests/logic.test.js",
+    "typecheck": "tsc --noEmit"
   },
   "private": true
 }
