@@ -4,11 +4,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, AppState, PermissionsAndroid, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as WakeAlarm from "./modules/wake-alarm";
-import { DECKS } from "./src/decks";
+import { DECKS, LANGS } from "./src/decks";
 import Home from "./src/Home";
 import { buildMission, currentStreak, dayKey, daysBetween, finishMission, formatTime, langProgress, Mission, State } from "./src/logic";
 import MissionScreen, { Finished } from "./src/Mission";
 import { startAlarm, stopAlarm } from "./src/sound";
+import { setVoicePrefs } from "./src/speech";
 import { loadState, saveState } from "./src/storage";
 import { Palette, usePalette } from "./src/theme";
 import { Btn, Card } from "./src/ui";
@@ -18,6 +19,11 @@ type Running = { mission: Mission; day: string; alarm: boolean };
 type DoneInfo = { alarm: boolean; secs: number; results: { i: number; ok: boolean }[]; day: string };
 
 const KEEP_AWAKE = "wakeword";
+
+// Tell the speech helper which voice was picked for each language.
+function syncVoices(s: State) {
+  setVoicePrefs(Object.fromEntries(LANGS.map((l) => [DECKS[l].tts, s.settings.voices[l]])));
+}
 
 export default function App() {
   return (
@@ -46,6 +52,7 @@ function Main() {
   const change = (fn: (s: State) => void) => {
     if (!state) return;
     fn(state);
+    syncVoices(state);
     saveState(state);
     bump((n) => n + 1);
   };
@@ -63,6 +70,7 @@ function Main() {
 
   useEffect(() => {
     loadState().then((s) => {
+      syncVoices(s);
       setState(s);
       checkOwed();
     });

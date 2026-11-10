@@ -11,15 +11,26 @@ export async function startAlarm(volume = 1): Promise<void> {
       player = createAudioPlayer(require("../assets/alarm.wav"));
       player.loop = true;
     }
-    player.volume = volume;
+    level = volume;
+    player.volume = ducked ? Math.min(volume, 0.03) : volume;
     player.play();
   } catch {
     // No audio: the native alarm still rings.
   }
 }
 
+let level = 1;
+let ducked = false;
+
 export function setAlarmVolume(volume: number): void {
-  if (player) player.volume = volume;
+  level = volume;
+  if (player && !ducked) player.volume = volume;
+}
+
+// Drops the alarm sound while a word is being spoken, so you can hear it.
+export function duckAlarm(on: boolean): void {
+  ducked = on;
+  if (player) player.volume = on ? Math.min(level, 0.03) : level;
 }
 
 export function stopAlarm(): void {

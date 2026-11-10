@@ -1,10 +1,11 @@
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import * as WakeAlarm from "../modules/wake-alarm";
 import { DECKS, LANGS, Lang } from "./decks";
 import { currentStreak, dayKey, formatTime, langProgress, Level, State, stats } from "./logic";
 import { PHOTO_CHECK_URL } from "./photoCheck";
+import { openVoiceSettings, speak, VoiceOption, voiceOptions } from "./speech";
 import { Btn, Card, Chips, Label } from "./ui";
 import { Palette } from "./theme";
 
@@ -116,6 +117,7 @@ export default function Home({ p, state, alarmNote, showSettings, onOpenSettings
           options={LANGS.map((l) => ({ value: l, label: DECKS[l].name }))}
           onChange={(v) => onChange((x) => { x.settings.lang = v; })}
         />
+        <VoicePicker p={p} lang={set.lang} value={set.voices[set.lang] || ""} onPick={(id) => onChange((x) => { x.settings.voices[set.lang] = id || undefined; })} />
         <Chips<Level>
           p={p}
           label="Level"
@@ -153,6 +155,46 @@ export default function Home({ p, state, alarmNote, showSettings, onOpenSettings
         <Research p={p} />
       </Card>
     </ScrollView>
+  );
+}
+
+function VoicePicker({ p, lang, value, onPick }: { p: Palette; lang: Lang; value: string; onPick: (id: string) => void }) {
+  const d = DECKS[lang];
+  const [voices, setVoices] = useState<VoiceOption[] | null>(null);
+  useEffect(() => {
+    let live = true;
+    voiceOptions(d.tts).then((v) => live && setVoices(v));
+    return () => {
+      live = false;
+    };
+  }, [d.tts]);
+  if (voices === null) return null;
+  const sample = `${d.hello}! ${d.words[0].w}.`;
+  const pickAndHear = (id: string) => {
+    onPick(id);
+    speak(sample, d.tts, id || voices[0]?.id);
+  };
+  return (
+    <View style={{ gap: 6 }}>
+      {voices.length > 1 ? (
+        <Chips<string>
+          p={p}
+          label={`${d.name} voice`}
+          value={value}
+          options={[{ value: "", label: "Best" }, ...voices.map((v) => ({ value: v.id, label: v.enhanced ? `${v.label} ★` : v.label }))]}
+          onChange={pickAndHear}
+        />
+      ) : (
+        <Btn p={p} label={`Hear the ${d.name} voice`} onPress={() => speak(sample, d.tts)} />
+      )}
+      <Text style={{ color: p.muted, fontSize: 14 }}>
+        {voices.length === 0
+          ? `Your phone has no ${d.name} voice yet. Add one in your phone's text-to-speech settings.`
+          : `Tap a voice to hear it. ★ marks the more natural ones.`}
+        {Platform.OS === "android" ? " Still robotic? Pick Google as the speech engine and download its voice." : ""}
+      </Text>
+      {Platform.OS === "android" && <Btn p={p} kind="link" label="Open text-to-speech settings" onPress={openVoiceSettings} />}
+    </View>
   );
 }
 
